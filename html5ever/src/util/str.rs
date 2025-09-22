@@ -25,6 +25,15 @@ pub(crate) fn lower_ascii_letter(c: char) -> Option<char> {
     }
 }
 
+pub(crate) fn lower_ascii_letter_or_colon(c: char) -> Option<char> {
+    match c {
+        'a'..='z' => Some(c),
+        'A'..='Z' => Some((c as u8 - b'A' + b'a') as char),
+        ':' => Some(':'),
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 #[allow(non_snake_case)]
 mod test {
