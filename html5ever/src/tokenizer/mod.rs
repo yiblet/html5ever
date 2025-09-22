@@ -21,7 +21,7 @@ use self::states::{Rawtext, Rcdata, ScriptData, ScriptDataEscaped};
 
 use self::char_ref::{CharRef, CharRefTokenizer};
 
-use crate::util::str::lower_ascii_letter;
+use crate::util::str::{lower_ascii_letter, lower_ascii_letter_or_colon};
 
 use log::{debug, trace};
 use markup5ever::{ns, small_char_set, TokenizerResult};
@@ -865,7 +865,7 @@ impl<Sink: TokenSink> Tokenizer<Sink> {
                         self.bad_char_error();
                         go!(self: clear_comment; reconsume BogusComment)
                     },
-                    c => match lower_ascii_letter(c) {
+                    c => match lower_ascii_letter_or_colon(c) {
                         Some(cl) => go!(self: create_tag StartTag cl; to TagName),
                         None => {
                             self.bad_char_error();
@@ -883,7 +883,7 @@ impl<Sink: TokenSink> Tokenizer<Sink> {
                         self.bad_char_error();
                         go!(self: to Data)
                     },
-                    c => match lower_ascii_letter(c) {
+                    c => match lower_ascii_letter_or_colon(c) {
                         Some(cl) => go!(self: create_tag EndTag cl; to TagName),
                         None => {
                             self.bad_char_error();
@@ -911,7 +911,8 @@ impl<Sink: TokenSink> Tokenizer<Sink> {
             states::RawLessThanSign(ScriptDataEscaped(Escaped)) => loop {
                 match get_char!(self, input) {
                     '/' => go!(self: clear_temp; to RawEndTagOpen ScriptDataEscaped Escaped),
-                    c => match lower_ascii_letter(c) {
+                    c => match lower_ascii_letter(c) { // NOTE(shalom): this is fine to keep this
+                        // way for the colon transform.
                         Some(cl) => {
                             go!(self: clear_temp; push_temp cl);
                             self.emit_char('<');
@@ -958,7 +959,7 @@ impl<Sink: TokenSink> Tokenizer<Sink> {
             //§ rcdata-end-tag-open-state rawtext-end-tag-open-state script-data-end-tag-open-state script-data-escaped-end-tag-open-state
             states::RawEndTagOpen(kind) => loop {
                 let c = get_char!(self, input);
-                match lower_ascii_letter(c) {
+                match lower_ascii_letter(c) { // NOTE(shalom): this is fine to keep this way for the colon transform.
                     Some(cl) => go!(self: create_tag EndTag cl; push_temp c; to RawEndTagName kind),
                     None => {
                         self.emit_char('<');
@@ -980,7 +981,7 @@ impl<Sink: TokenSink> Tokenizer<Sink> {
                     }
                 }
 
-                match lower_ascii_letter(c) {
+                match lower_ascii_letter(c) { // NOTE(shalom): this is fine to keep this way for the colon transform.
                     Some(cl) => go!(self: push_tag cl; push_temp c),
                     None => {
                         go!(self: discard_tag);
@@ -1005,7 +1006,7 @@ impl<Sink: TokenSink> Tokenizer<Sink> {
                         self.emit_char(c);
                         go!(self: to RawData ScriptDataEscaped esc);
                     },
-                    _ => match lower_ascii_letter(c) {
+                    _ => match lower_ascii_letter(c) {  // NOTE(shalom): this is fine to keep this way for the colon transform.
                         Some(cl) => {
                             go!(self: push_temp cl);
                             self.emit_char(c);
@@ -1103,7 +1104,7 @@ impl<Sink: TokenSink> Tokenizer<Sink> {
                         self.emit_char(c);
                         go!(self: to RawData ScriptDataEscaped esc);
                     },
-                    _ => match lower_ascii_letter(c) {
+                    _ => match lower_ascii_letter(c) { // NOTE(shalom): this is fine to keep this way for the colon transform.
                         Some(cl) => {
                             go!(self: push_temp cl);
                             self.emit_char(c);
@@ -1123,7 +1124,7 @@ impl<Sink: TokenSink> Tokenizer<Sink> {
                         self.bad_char_error();
                         go!(self: create_attr '\u{fffd}'; to AttributeName)
                     },
-                    c => match lower_ascii_letter(c) {
+                    c => match lower_ascii_letter(c) { // NOTE(shalom): this is fine to keep this way for the colon transform.
                         Some(cl) => go!(self: create_attr cl; to AttributeName),
                         None => {
                             if matches!(c, '"' | '\'' | '<' | '=') {
@@ -1147,7 +1148,7 @@ impl<Sink: TokenSink> Tokenizer<Sink> {
                         self.bad_char_error();
                         go!(self: push_name '\u{fffd}')
                     },
-                    c => match lower_ascii_letter(c) {
+                    c => match lower_ascii_letter(c) { // NOTE(shalom): this is fine to keep this way for the colon transform.
                         Some(cl) => go!(self: push_name cl),
                         None => {
                             if matches!(c, '"' | '\'' | '<') {
@@ -1170,7 +1171,7 @@ impl<Sink: TokenSink> Tokenizer<Sink> {
                         self.bad_char_error();
                         go!(self: create_attr '\u{fffd}'; to AttributeName)
                     },
-                    c => match lower_ascii_letter(c) {
+                    c => match lower_ascii_letter(c) { // NOTE(shalom): this is fine to keep this way for the colon transform.
                         Some(cl) => go!(self: create_attr cl; to AttributeName),
                         None => {
                             if matches!(c, '"' | '\'' | '<') {
