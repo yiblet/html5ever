@@ -12,6 +12,7 @@ use crate::tendril::StrTendril;
 use crate::tokenizer::states;
 use crate::LocalName;
 use std::borrow::Cow;
+use std::ops::Deref;
 
 pub use self::TagKind::{EndTag, StartTag};
 pub use self::Token::{CharacterTokens, CommentToken, DoctypeToken, TagToken};
@@ -43,6 +44,11 @@ pub struct Tag {
 }
 
 impl Tag {
+    pub fn is_colon_tag(&self) -> bool {
+        let name = self.name.deref();
+        name.starts_with(':')
+    }
+
     /// Are the tags equivalent when we don't care about attribute order?
     /// Also ignores the self-closing flag.
     pub fn equiv_modulo_attr_order(&self, other: &Tag) -> bool {
