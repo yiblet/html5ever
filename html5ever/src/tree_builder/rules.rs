@@ -991,8 +991,13 @@ where
                         self.parse_raw_data(tag, Rawtext)
                     } else {
                         self.reconstruct_active_formatting_elements();
-                        self.insert_element_for(tag);
-                        ProcessResult::Done
+                        if tag.is_colon_tag() && tag.self_closing {
+                            self.insert_and_pop_element_for(tag);
+                            ProcessResult::DoneAckSelfClosing
+                        } else {
+                            self.insert_element_for(tag);
+                            ProcessResult::Done
+                        }
                     }
                 },
 
