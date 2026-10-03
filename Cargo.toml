@@ -18,9 +18,11 @@ edition = "2021"
 rust-version = "1.71.0"
 
 [workspace.dependencies]
+# Share published support crates with downstream consumers such as Scraper.
+tendril = "0.5.1"
+web_atoms = "0.2.6"
+
 # Repo dependencies
-tendril = { version = "0.5", path = "tendril" }
-web_atoms = { version = "0.2.3", path = "web_atoms" }
 markup5ever = { version = "0.39", path = "markup5ever" }
 xml5ever = { version = "0.39", path = "xml5ever" }
 html5ever = { version = "0.39", path = "html5ever" }
